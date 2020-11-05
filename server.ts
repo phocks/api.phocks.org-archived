@@ -1,4 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { oakCors } from "https://deno.land/x/cors/mod.ts";
 import { green, yellow } from "https://deno.land/std@0.53.0/fmt/colors.ts";
 
 const app = new Application();
@@ -7,6 +8,12 @@ const port: number = 65000;
 interface Schema {
   count: number;
 }
+
+app.use(
+  oakCors({
+    origin: "*"
+  }),
+);
 
 // Logger
 app.use(async (ctx, next) => {
