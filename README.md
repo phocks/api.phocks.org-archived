@@ -1,2 +1,2 @@
-# rise
-A test on the server
+# api.phocks.org
+A test api.
