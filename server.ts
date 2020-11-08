@@ -51,6 +51,7 @@ router.get("/", async ({ response }: { response: any }) => {
   };
 });
 
+// Returns how many times a referrer has requested
 router.get("/count", async (context) => {
   const headers = context.request.headers;
   const referer = headers.get("referer");

@@ -1,4 +1,6 @@
 # scripts.yaml
+# For pm2 do this:
+# pm2 start server.ts --interpreter="deno" --interpreter-args="run --allow-net --unstable --allow-env --allow-read --allow-plugin --allow-write"
 scripts:
   start: deno run --allow-net --unstable --allow-env --allow-read --allow-plugin --allow-write server.ts
   test: deno test --allow-net server_test.ts
