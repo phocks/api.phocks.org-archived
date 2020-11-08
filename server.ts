@@ -85,6 +85,11 @@ router.get("/count", async (context) => {
         count: 1,
       };
     }
+  } else {
+    context.response.body = {
+      referer: null,
+      count: 0,
+    };
   }
 });
 
