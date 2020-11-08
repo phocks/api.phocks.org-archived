@@ -50,7 +50,8 @@ router.get("/", async ({ response }: { response: any }) => {
 
 router.post("/count", async (ctx) => {
   const result = ctx.request.body({ type: "json" });
-  const referer = await result.value;
+  const json = await result.value;
+  const referer = json.referer;
 
   ctx.response.body = {
     message: "Hello",
