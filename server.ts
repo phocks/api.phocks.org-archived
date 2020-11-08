@@ -16,9 +16,6 @@ interface CountSchema {
 const db = client.database("phocks");
 const counts = db.collection<CountSchema>("counts");
 
-const allCounts = await counts.find({ referer: { $ne: null } });
-console.log(allCounts);
-
 const app = new Application();
 const port: number = 65000;
 
@@ -51,10 +48,13 @@ router.get("/", async ({ response }: { response: any }) => {
   };
 });
 
-// Returns how many times a referrer has requested
-router.get("/count", async (context) => {
-  const headers = context.request.headers;
-  const referer = headers.get("referer");
+router.post("/count", async (ctx) => {
+  const result = ctx.request.body({ type: "json" });
+  const referer = await result.value;
+
+  ctx.response.body = {
+    message: "Hello",
+  };
 
   if (referer) {
     const found = await counts.findOne({ referer: referer });
@@ -69,7 +69,7 @@ router.get("/count", async (context) => {
         { $set: { count: found.count + 1 } }
       );
 
-      context.response.body = {
+      ctx.response.body = {
         referer: referer,
         count: found.count + 1,
       };
@@ -79,13 +79,13 @@ router.get("/count", async (context) => {
         count: 1,
       });
 
-      context.response.body = {
+      ctx.response.body = {
         referer: referer,
         count: 1,
       };
     }
   } else {
-    context.response.body = {
+    ctx.response.body = {
       referer: null,
       count: 0,
     };
