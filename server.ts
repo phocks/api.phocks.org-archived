@@ -1,22 +1,32 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { oakCors } from "https://deno.land/x/cors/mod.ts";
+import { Application, Router } from "https://deno.land/x/oak@v6.3.1/mod.ts";
+import { oakCors } from "https://deno.land/x/cors@v1.2.1/mod.ts";
 import { green, yellow } from "https://deno.land/std@0.53.0/fmt/colors.ts";
+import { MongoClient } from "https://deno.land/x/mongo@v0.13.0/mod.ts";
+
+const client = new MongoClient();
+client.connectWithUri("mongodb://localhost:27017");
+
+// Defining schema interface
+interface CountSchema {
+  _id: { $oid: string };
+  referer: string;
+  count: number;
+}
+
+const db = client.database("phocks");
+const counts = db.collection<CountSchema>("counts");
+
+const allCounts = await counts.find({ referer: { $ne: null } });
+console.log(allCounts);
 
 const app = new Application();
 const port: number = 65000;
-
-interface Schema {
-  count: number;
-}
 
 app.use(
   oakCors({
     origin: "*",
   })
 );
-
-// Temporary var
-let count = 0;
 
 // Logger
 app.use(async (ctx, next) => {
@@ -41,16 +51,41 @@ router.get("/", async ({ response }: { response: any }) => {
   };
 });
 
-
 router.get("/count", async (context) => {
   const headers = context.request.headers;
-
   const referer = headers.get("referer");
 
-  context.response.body = {
-    referer: referer,
-    count: ++count,
-  };
+  if (referer) {
+    const found = await counts.findOne({ referer: referer });
+
+    if (found) {
+      console.log(found);
+
+      const {
+        matchedCount,
+        modifiedCount,
+        upsertedId,
+      } = await counts.updateOne(
+        { referer: referer },
+        { $set: { count: found.count + 1 } }
+      );
+
+      context.response.body = {
+        referer: referer,
+        count: found.count + 1,
+      };
+    } else {
+      const result = await counts.insertOne({
+        referer: referer,
+        count: 1,
+      });
+
+      context.response.body = {
+        referer: referer,
+        count: 1,
+      };
+    }
+  }
 });
 
 app.use(router.routes());
