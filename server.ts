@@ -11,9 +11,12 @@ interface Schema {
 
 app.use(
   oakCors({
-    origin: "*"
-  }),
+    origin: "*",
+  })
 );
+
+// Temporary var
+let count = 0;
 
 // Logger
 app.use(async (ctx, next) => {
@@ -31,11 +34,25 @@ app.use(async (ctx, next) => {
 });
 
 const router = new Router();
+
 router.get("/", async ({ response }: { response: any }) => {
   response.body = {
     message: "Hello. Welcome to the API.",
   };
 });
+
+
+router.get("/count", async (context) => {
+  const headers = context.request.headers;
+
+  const referer = headers.get("referer");
+
+  context.response.body = {
+    referer: referer,
+    count: ++count,
+  };
+});
+
 app.use(router.routes());
 app.use(router.allowedMethods());
 
