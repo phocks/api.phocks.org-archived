@@ -60,8 +60,6 @@ router.get("/count", async (context) => {
     const found = await counts.findOne({ referer: referer });
 
     if (found) {
-      console.log(found);
-
       const {
         matchedCount,
         modifiedCount,
