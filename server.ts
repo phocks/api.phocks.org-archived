@@ -19,6 +19,7 @@ const counts = db.collection<CountSchema>("counts");
 const app = new Application();
 const port: number = 65000;
 
+// Open server to requests from other domains
 app.use(
   oakCors({
     origin: "*",
@@ -53,9 +54,14 @@ router.post("/count", async (ctx) => {
   const json = await result.value;
   const referer = json.referer;
 
-  ctx.response.body = {
-    message: "Hello",
-  };
+  if (!referer.includes("phocks.github.io")) {
+    ctx.response.status = 403;
+    ctx.response.body = {
+      message: "Site not supported, sorry..."
+    };
+
+    return;
+  }
 
   if (referer) {
     const found = await counts.findOne({ referer: referer });
